@@ -1,3 +1,11 @@
+//
+//  RContributionsScreen.swift
+//  GreenMatesColab
+//
+//  Created by base on 17/11/24.
+//
+
+
 import SwiftUI
 
 struct RContributionsScreen: View {
@@ -119,47 +127,76 @@ struct ContributionEntry: View {
 struct ScanCodeRScreen: View {
     let onClose: () -> Void
     let recolectaId: String
-
+    
+    @State private var showAddRecolectaScreen = false
+    @State private var userFBID: String = "j2SLLR35SvakRrnbo5ZM9LGhURA2" // Default UserFBID
+    
     var body: some View {
-        VStack {
-            Text("Escanear Código")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-            Text("Recolecta ID: \(recolectaId)")
-                .padding()
-            Spacer()
-            Button(action: onClose) {
-                Text("Cerrar")
+        if showAddRecolectaScreen {
+            AddRecolectaScreen(onClose: { showAddRecolectaScreen = false }, recolectaId: recolectaId, userFBID: userFBID)
+        } else {
+            VStack(spacing: 24) {
+                Text("Ecoespacio")
+                    .font(.largeTitle)
                     .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, maxHeight: 50)
-                    .background(Color.gray)
-                    .foregroundColor(.white)
-                    .cornerRadius(16)
+                    .foregroundColor(.green)
+                
+                Text("Registro de recolecta")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                
+                Text("Escanea código de usuario")
+                    .font(.headline)
+                
+                // Simulate QR Code Scanner Box
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 200, height: 200)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.black, lineWidth: 2)
+                    )
+                
+                Text("Recolecta ID: \(recolectaId)")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                
+                // Input Field for Simulating User FBID
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("User FBID")
+                        .font(.headline)
+                    TextField("Enter User FBID", text: $userFBID)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                }
+                
+                Spacer()
+                
+                // Buttons
+                HStack {
+                    Button(action: onClose) {
+                        Text("Regresar")
+                            .fontWeight(.bold)
+                            .frame(maxWidth: .infinity, maxHeight: 50)
+                            .background(Color.gray)
+                            .foregroundColor(.white)
+                            .cornerRadius(16)
+                    }
+                    
+                    Button(action: { showAddRecolectaScreen = true }) {
+                        Text("Escanear")
+                            .fontWeight(.bold)
+                            .frame(maxWidth: .infinity, maxHeight: 50)
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(16)
+                    }
+                }
+                .padding()
             }
+            .padding()
         }
-        .padding()
     }
 }
 
-struct CircularProgress: View {
-    let progress: Int // Progress as a percentage (0-100)
 
-    var body: some View {
-        ZStack {
-            Circle()
-                .stroke(lineWidth: 6)
-                .opacity(0.3)
-                .foregroundColor(.green)
-            Circle()
-                .trim(from: 0.0, to: CGFloat(progress) / 100)
-                .stroke(style: StrokeStyle(lineWidth: 6, lineCap: .round))
-                .foregroundColor(.green)
-                .rotationEffect(Angle(degrees: -90))
-            Text("\(progress)%")
-                .font(.footnote)
-                .fontWeight(.bold)
-                .foregroundColor(.green)
-        }
-        .frame(width: 48, height: 48)
-    }
-}

@@ -1,3 +1,11 @@
+//
+//  RecolectaRequestBody.swift
+//  GreenMatesColab
+//
+//  Created by base on 17/11/24.
+//
+
+
 import Foundation
 
 struct RecolectaRequestBody: Codable {
@@ -14,105 +22,92 @@ struct TallerRequestBody: Codable {
     let UserFBID: String
 }
 
-class GreenMatesApi {
-    static let shared = GreenMatesApi()
-    private let baseURL = "http://10.50.90.159:3000"
+struct getTaller: Codable, Identifiable {
+    let courseID: String
+    let collaboratorFBID: String
+    let title: String
+    let pillar: String
+    let startTime: Date
+    let endTime: Date
+    let longitude: Double
+    let latitude: Double
+    let limit: Int
+    let assistantArray: [Assistant]
     
-    private var jsonDecoder: JSONDecoder {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return decoder
-    }
-    
-    private var jsonEncoder: JSONEncoder {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        return encoder
-    }
-    
-    private func makeRequest<T: Codable>(
-        endpoint: String,
-        method: String = "GET",
-        body: T? = nil,
-        completion: @escaping (Result<Data, Error>) -> Void
-    ) {
-        guard let url = URL(string: baseURL + endpoint) else {
-            completion(.failure(NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        if let body = body {
-            do {
-                request.httpBody = try jsonEncoder.encode(body)
-            } catch {
-                completion(.failure(error))
-                return
-            }
-        }
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let data = data else {
-                completion(.failure(NSError(domain: "", code: 500, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
-                return
-            }
-            
-            completion(.success(data))
-        }
-        task.resume()
-    }
-    
-    // Example: Get User
-    func getUser(uid: String, completion: @escaping (Result<User, Error>) -> Void) {
-        makeRequest(endpoint: "/api/collaborator/\(uid)") { result in
-            switch result {
-            case .success(let data):
-                do {
-                    let userResponse = try self.jsonDecoder.decode(UserResponse.self, from: data)
-                    completion(.success(userResponse.collaborator))
-                } catch {
-                    completion(.failure(error))
-                }
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-    }
-    
-    // Example: Create User
-    func createUser(user: User, completion: @escaping (Result<Void, Error>) -> Void) {
-        makeRequest(endpoint: "/api/collaborator", method: "POST", body: user) { result in
-            switch result {
-            case .success:
-                completion(.success(()))
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-    }
-    
-    // Example: Fetch Talleres
-    func getCourses(uid: String, completion: @escaping (Result<[getTaller], Error>) -> Void) {
-        makeRequest(endpoint: "/api/course/collaborator_courses/\(uid)") { result in
-            switch result {
-            case .success(let data):
-                do {
-                    let courses = try self.jsonDecoder.decode([getTaller].self, from: data)
-                    completion(.success(courses))
-                } catch {
-                    completion(.failure(error))
-                }
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
+    var id: String { courseID }
+
+    enum CodingKeys: String, CodingKey {
+        case courseID = "CourseID"
+        case collaboratorFBID = "CollaboratorFBID"
+        case title = "Title"
+        case pillar = "Pillar"
+        case startTime = "StartTime"
+        case endTime = "EndTime"
+        case longitude = "Longitude"
+        case latitude = "Latitude"
+        case limit = "Limit"
+        case assistantArray = "AssistantArray"
     }
 }
+
+struct Assistant: Codable {
+    let userFBID: String
+    let username: String
+    let email: String
+
+    enum CodingKeys: String, CodingKey {
+        case userFBID = "UserFBID"
+        case username = "Username"
+        case email = "Email"
+    }
+}
+
+
+struct getRecolecta: Codable, Identifiable {
+    let recollectID: String
+    let collaboratorFBID: String
+    let startTime: Date
+    let endTime: Date
+    let longitude: Double
+    let latitude: Double
+    let limit: Int
+    let donationArray: [Donation]
+    
+    var id: String { recollectID }
+
+    enum CodingKeys: String, CodingKey {
+        case recollectID = "RecollectID"
+        case collaboratorFBID = "CollaboratorFBID"
+        case startTime = "StartTime"
+        case endTime = "EndTime"
+        case longitude = "Longitude"
+        case latitude = "Latitude"
+        case limit = "Limit"
+        case donationArray = "DonationArray"
+    }
+}
+
+struct Donation: Codable {
+    let userFBID: String
+    let username: String
+    let cardboard: Int
+    let glass: Int
+    let tetrapack: Int
+    let plastic: Int
+    let paper: Int
+    let metal: Int
+
+    enum CodingKeys: String, CodingKey {
+        case userFBID = "UserFBID"
+        case username = "Username"
+        case cardboard = "Cardboard"
+        case glass = "Glass"
+        case tetrapack = "Tetrapack"
+        case plastic = "Plastic"
+        case paper = "Paper"
+        case metal = "Metal"
+    }
+}
+
+
+

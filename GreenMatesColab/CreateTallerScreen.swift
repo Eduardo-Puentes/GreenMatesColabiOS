@@ -5,9 +5,9 @@ struct CreateTallerScreen: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var title: String = ""
     @State private var selectedPillar: String = ""
-    @State private var date: String = ""
-    @State private var startTime: String = ""
-    @State private var endTime: String = ""
+    @State private var selectedDate: Date = Date()
+    @State private var selectedStartTime: Date = Date()
+    @State private var selectedEndTime: Date = Date()
     @State private var selectedLocation: CLLocationCoordinate2D? = nil
     @State private var limit: String = ""
     @State private var errorMessage: String? = nil
@@ -55,17 +55,21 @@ struct CreateTallerScreen: View {
                     }
                     
                     Section(header: Text("Horario")) {
-                        TextField("Fecha (yyyy-MM-dd)", text: $date)
-                        HStack {
-                            TimeInputField(label: "Hora de inicio", time: $startTime)
-                            TimeInputField(label: "Hora de fin", time: $endTime)
-                        }
+                        DatePicker("Fecha", selection: $selectedDate, displayedComponents: .date)
+                            .datePickerStyle(GraphicalDatePickerStyle())
+                        
+                        DatePicker("Hora de Inicio", selection: $selectedStartTime, displayedComponents: .hourAndMinute)
+                            .datePickerStyle(WheelDatePickerStyle())
+                        
+                        DatePicker("Hora de Fin", selection: $selectedEndTime, displayedComponents: .hourAndMinute)
+                            .datePickerStyle(WheelDatePickerStyle())
                     }
                 }
                 
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
+                        .padding()
                 }
                 
                 HStack {
@@ -79,7 +83,7 @@ struct CreateTallerScreen: View {
                     }
                     .disabled(isLoading || !isFormValid())
                     
-                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                    Button(action: { onClose() }) {
                         Text("Cancelar")
                             .frame(maxWidth: .infinity)
                             .padding()
@@ -95,9 +99,7 @@ struct CreateTallerScreen: View {
     }
     
     private func isFormValid() -> Bool {
-        !title.isEmpty && !limit.isEmpty && !selectedPillar.isEmpty &&
-        !date.isEmpty && !startTime.isEmpty && !endTime.isEmpty &&
-        selectedLocation != nil
+        !title.isEmpty && !limit.isEmpty && !selectedPillar.isEmpty && selectedLocation != nil
     }
     
     private func handleCreateTaller() {
@@ -111,24 +113,25 @@ struct CreateTallerScreen: View {
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
-        let startDateTimeString = "\(date)T\(startTime):00Z"
-        let endDateTimeString = "\(date)T\(endTime):00Z"
+        // Combina la fecha y la hora seleccionadas
+        let calendar = Calendar.current
+        let startDateTime = calendar.date(bySettingHour: calendar.component(.hour, from: selectedStartTime),
+                                          minute: calendar.component(.minute, from: selectedStartTime),
+                                          second: 0, of: selectedDate)!
         
-        guard let startDateTime = dateFormatter.date(from: startDateTimeString),
-              let endDateTime = dateFormatter.date(from: endDateTimeString) else {
-            errorMessage = "Error al formatear fecha u hora."
-            return
-        }
+        let endDateTime = calendar.date(bySettingHour: calendar.component(.hour, from: selectedEndTime),
+                                        minute: calendar.component(.minute, from: selectedEndTime),
+                                        second: 0, of: selectedDate)!
         
         let taller = Taller(
-            collaboratorFBID: userInfo.FBID,
-            title: title,
-            pillar: selectedPillar,
-            startTime: startDateTime,
-            endTime: endDateTime,
-            longitude: longitude,
-            latitude: latitude,
-            limit: limitInt
+            CollaboratorFBID: userInfo.FBID,
+            Title: title,
+            Pillar: selectedPillar,
+            StartTime: startDateTime,
+            EndTime: endDateTime,
+            Longitude: longitude,
+            Latitude: latitude,
+            Limit: limitInt
         )
         
         isLoading = true
@@ -145,6 +148,7 @@ struct CreateTallerScreen: View {
         }
     }
 }
+
 
 struct PillarCheckbox: View {
     let label: String

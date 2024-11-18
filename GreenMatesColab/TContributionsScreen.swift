@@ -1,3 +1,11 @@
+//
+//  TContributionsScreen.swift
+//  GreenMatesColab
+//
+//  Created by base on 17/11/24.
+//
+
+
 import SwiftUI
 
 struct TContributionsScreen: View {
@@ -80,7 +88,7 @@ struct TallerDetailsBox: View {
 }
 
 struct CircularProgress: View {
-    let progress: Int // Progress as a percentage (0-100)
+    let progress: Int
 
     var body: some View {
         ZStack {
@@ -124,23 +132,104 @@ struct ScanCodeTScreen: View {
     let onClose: () -> Void
     let courseId: String
 
+    @State private var userFBID: String = ""
+    @State private var errorMessage: String? = nil
+    @State private var isLoading: Bool = false
+
     var body: some View {
         VStack {
-            Text("Escanear Código")
+            Text("Ecoespacio")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            Text("Course ID: \(courseId)")
+                .foregroundColor(.green)
                 .padding()
+
+            Text("Registro de Asistencia al Taller")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .padding()
+
             Spacer()
+
+            Text("Escanea código de usuario")
+                .font(.headline)
+                .padding()
+
+            // Placeholder for QR Code Scanner
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 200, height: 200)
+                .overlay(Text("QR Code Scanner Placeholder").foregroundColor(.gray))
+
+            Spacer()
+
+            // User FBID Input
+            TextField("User FBID", text: $userFBID)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .padding(.bottom)
+            }
+
+            Button(action: {
+                handleAddAssistance()
+            }) {
+                if isLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: 50)
+                        .background(Color.green.opacity(0.8))
+                        .foregroundColor(.white)
+                        .cornerRadius(16)
+                } else {
+                    Text("Confirmar Asistencia")
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, maxHeight: 50)
+                        .background(Color.green.opacity(0.8))
+                        .foregroundColor(.white)
+                        .cornerRadius(16)
+                }
+            }
+            .disabled(isLoading || userFBID.isEmpty)
+            .padding()
+
             Button(action: onClose) {
-                Text("Cerrar")
+                Text("Regresar")
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity, maxHeight: 50)
-                    .background(Color.gray)
+                    .background(Color.gray.opacity(0.3))
                     .foregroundColor(.white)
                     .cornerRadius(16)
             }
+            .padding()
         }
         .padding()
     }
+
+    private func handleAddAssistance() {
+        guard !userFBID.isEmpty else {
+            errorMessage = "Por favor ingrese el ID del usuario."
+            return
+        }
+
+        isLoading = true
+        errorMessage = nil
+
+        let body = TallerRequestBody(UserFBID: userFBID)
+
+        GreenMatesApi.shared.addAssistance(courseId: courseId, body: body) { result in
+            DispatchQueue.main.async {
+                isLoading = false
+                switch result {
+                case .success:
+                    onClose()
+                case .failure(let error):
+                    errorMessage = "Error al registrar asistencia: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
 }
+

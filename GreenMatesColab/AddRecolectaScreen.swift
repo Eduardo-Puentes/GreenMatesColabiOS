@@ -1,3 +1,11 @@
+//
+//  AddRecolectaScreen.swift
+//  GreenMatesColab
+//
+//  Created by base on 17/11/24.
+//
+
+
 import SwiftUI
 
 struct AddRecolectaScreen: View {
@@ -86,13 +94,13 @@ struct AddRecolectaScreen: View {
         errorMessage = nil
 
         let body = RecolectaRequestBody(
-            userFBID: userFBID,
-            paper: paper,
-            cardboard: cardboard,
-            metal: metal,
-            plastic: plastic,
-            glass: glass,
-            tetrapack: tetrapack
+            UserFBID: userFBID,
+            Paper: paper,
+            Cardboard: cardboard,
+            Metal: metal,
+            Plastic: plastic,
+            Glass: glass,
+            Tetrapack: tetrapack
         )
 
         GreenMatesApi.shared.addToRecolecta(
@@ -132,14 +140,4 @@ struct ItemInputRow: View {
         }
         .padding(.vertical, 8)
     }
-}
-
-struct RecolectaRequestBody: Codable {
-    let userFBID: String
-    let paper: Int
-    let cardboard: Int
-    let metal: Int
-    let plastic: Int
-    let glass: Int
-    let tetrapack: Int
 }

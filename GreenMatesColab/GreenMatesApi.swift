@@ -1,4 +1,15 @@
+//
+//  GreenMatesApi.swift
+//  GreenMatesColab
+//
+//  Created by base on 17/11/24.
+//
+
+
 import Foundation
+
+struct EmptyResponse: Codable {}
+
 
 class GreenMatesApi {
     static let shared = GreenMatesApi()
@@ -16,21 +27,22 @@ class GreenMatesApi {
         return encoder
     }
     
-    private func makeRequest<T: Codable>(
+    private func makeRequest<Response: Codable>(
         endpoint: String,
         method: String = "GET",
-        body: T? = nil,
-        completion: @escaping (Result<Data, Error>) -> Void
+        body: Codable? = nil,
+        responseType: Response.Type,
+        completion: @escaping (Result<Response, Error>) -> Void
     ) {
         guard let url = URL(string: baseURL + endpoint) else {
             completion(.failure(NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
             return
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+
         if let body = body {
             do {
                 request.httpBody = try jsonEncoder.encode(body)
@@ -39,36 +51,43 @@ class GreenMatesApi {
                 return
             }
         }
-        
+
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return
             }
-            
+
             guard let data = data else {
                 completion(.failure(NSError(domain: "", code: 500, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
                 return
             }
-            
-            completion(.success(data))
+
+            print("Raw data from \(endpoint):", String(data: data, encoding: .utf8) ?? "Invalid UTF-8")
+
+            do {
+                let decodedResponse = try self.jsonDecoder.decode(Response.self, from: data)
+                completion(.success(decodedResponse))
+            } catch {
+                print("Decoding error:", error)
+                completion(.failure(error))
+            }
         }
         task.resume()
     }
+
     
     // MARK: - API Calls
     
     // Get User
     func getUser(uid: String, completion: @escaping (Result<User, Error>) -> Void) {
-        makeRequest(endpoint: "/api/collaborator/\(uid)") { result in
+        makeRequest(
+            endpoint: "/api/collaborator/\(uid)",
+            responseType: UserResponse.self
+        ) { result in
             switch result {
-            case .success(let data):
-                do {
-                    let userResponse = try self.jsonDecoder.decode(UserResponse.self, from: data)
-                    completion(.success(userResponse.collaborator))
-                } catch {
-                    completion(.failure(error))
-                }
+            case .success(let userResponse):
+                completion(.success(userResponse.collaborator))
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -77,7 +96,12 @@ class GreenMatesApi {
     
     // Create User
     func createUser(user: User, completion: @escaping (Result<Void, Error>) -> Void) {
-        makeRequest(endpoint: "/api/collaborator", method: "POST", body: user) { result in
+        makeRequest(
+            endpoint: "/api/collaborator",
+            method: "POST",
+            body: user,
+            responseType: EmptyResponse.self // A helper type for empty responses
+        ) { result in
             switch result {
             case .success:
                 completion(.success(()))
@@ -87,9 +111,13 @@ class GreenMatesApi {
         }
     }
     
-    // Add Workshop
     func addWorkshop(taller: Taller, completion: @escaping (Result<Void, Error>) -> Void) {
-        makeRequest(endpoint: "/api/course", method: "POST", body: taller) { result in
+        makeRequest(
+            endpoint: "/api/course",
+            method: "POST",
+            body: taller,
+            responseType: EmptyResponse.self
+        ) { result in
             switch result {
             case .success:
                 completion(.success(()))
@@ -99,9 +127,13 @@ class GreenMatesApi {
         }
     }
     
-    // Add Recolecta
     func addRecolecta(recolecta: Recolecta, completion: @escaping (Result<Void, Error>) -> Void) {
-        makeRequest(endpoint: "/api/recollect", method: "POST", body: recolecta) { result in
+        makeRequest(
+            endpoint: "/api/recollect",
+            method: "POST",
+            body: recolecta,
+            responseType: EmptyResponse.self
+        ) { result in
             switch result {
             case .success:
                 completion(.success(()))
@@ -111,43 +143,47 @@ class GreenMatesApi {
         }
     }
     
-    // Get Courses
     func getCourses(uid: String, completion: @escaping (Result<[getTaller], Error>) -> Void) {
-        makeRequest(endpoint: "/api/course/collaborator_courses/\(uid)") { result in
+        makeRequest(
+            endpoint: "/api/course/collaborator_courses/\(uid)",
+            responseType: [getTaller].self
+        ) { result in
             switch result {
-            case .success(let data):
-                do {
-                    let courses = try self.jsonDecoder.decode([getTaller].self, from: data)
-                    completion(.success(courses))
-                } catch {
-                    completion(.failure(error))
-                }
+            case .success(let courses):
+                print("Fetched Courses: \(courses)") // Debugging line
+                completion(.success(courses))
             case .failure(let error):
+                print("Error fetching courses: \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }
     }
+
+
     
     // Get Recolectas
     func getRecolectas(uid: String, completion: @escaping (Result<[getRecolecta], Error>) -> Void) {
-        makeRequest(endpoint: "/api/recollect/collaborator_recollects/\(uid)") { result in
+        makeRequest(
+            endpoint: "/api/recollect/collaborator_recollects/\(uid)",
+            responseType: [getRecolecta].self
+        ) { result in
             switch result {
-            case .success(let data):
-                do {
-                    let recolectas = try self.jsonDecoder.decode([getRecolecta].self, from: data)
-                    completion(.success(recolectas))
-                } catch {
-                    completion(.failure(error))
-                }
+            case .success(let recolectas):
+                completion(.success(recolectas))
             case .failure(let error):
                 completion(.failure(error))
             }
         }
     }
+
     
-    // Add to Recolecta
     func addToRecolecta(recollectId: String, body: RecolectaRequestBody, completion: @escaping (Result<Void, Error>) -> Void) {
-        makeRequest(endpoint: "/api/recollect/add_to_recollect/\(recollectId)", method: "PATCH", body: body) { result in
+        makeRequest(
+            endpoint: "/api/recollect/add_to_recollect/\(recollectId)",
+            method: "PATCH",
+            body: body,
+            responseType: EmptyResponse.self
+        ) { result in
             switch result {
             case .success:
                 completion(.success(()))
@@ -157,9 +193,13 @@ class GreenMatesApi {
         }
     }
     
-    // Add Assistance
     func addAssistance(courseId: String, body: TallerRequestBody, completion: @escaping (Result<Void, Error>) -> Void) {
-        makeRequest(endpoint: "/api/course/add_assistant/\(courseId)", method: "PATCH", body: body) { result in
+        makeRequest(
+            endpoint: "/api/course/add_assistant/\(courseId)",
+            method: "PATCH",
+            body: body,
+            responseType: EmptyResponse.self
+        ) { result in
             switch result {
             case .success:
                 completion(.success(()))
@@ -168,4 +208,5 @@ class GreenMatesApi {
             }
         }
     }
+
 }

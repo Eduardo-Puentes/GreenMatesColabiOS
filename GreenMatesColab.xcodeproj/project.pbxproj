@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4B5B2C5D2CEA5ED70003D6DD /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 4B5B2C5C2CEA5ED70003D6DD /* FirebaseAuth */; };
+		4B5B2C5F2CEA5ED70003D6DD /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 4B5B2C5E2CEA5ED70003D6DD /* FirebaseAuthCombine-Community */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		4B5B2C312CEA53F10003D6DD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +34,22 @@
 		4B5B2C3A2CEA53F10003D6DD /* GreenMatesColabUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GreenMatesColabUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		4BE2F64C2CEAB4A300BB73B2 /* Exceptions for "GreenMatesColab" folder in "GreenMatesColab" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 4B5B2C1F2CEA53EE0003D6DD /* GreenMatesColab */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4B5B2C222CEA53EE0003D6DD /* GreenMatesColab */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4BE2F64C2CEAB4A300BB73B2 /* Exceptions for "GreenMatesColab" folder in "GreenMatesColab" target */,
+			);
 			path = GreenMatesColab;
 			sourceTree = "<group>";
 		};
@@ -52,6 +70,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B5B2C5D2CEA5ED70003D6DD /* FirebaseAuth in Frameworks */,
+				4B5B2C5F2CEA5ED70003D6DD /* FirebaseAuthCombine-Community in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +132,8 @@
 			);
 			name = GreenMatesColab;
 			packageProductDependencies = (
+				4B5B2C5C2CEA5ED70003D6DD /* FirebaseAuth */,
+				4B5B2C5E2CEA5ED70003D6DD /* FirebaseAuthCombine-Community */,
 			);
 			productName = GreenMatesColab;
 			productReference = 4B5B2C202CEA53EE0003D6DD /* GreenMatesColab.app */;
@@ -195,6 +217,9 @@
 			);
 			mainGroup = 4B5B2C172CEA53EE0003D6DD;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4B5B2C5B2CEA5ED70003D6DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4B5B2C212CEA53EE0003D6DD /* Products */;
 			projectDirPath = "";
@@ -399,6 +424,7 @@
 				DEVELOPMENT_TEAM = Y2ZHLKNKYK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GreenMatesColab/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -409,6 +435,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				NSAllowsArbitraryLoads = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = mx.tec.a07133177.GreenMatesColab;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -428,6 +455,7 @@
 				DEVELOPMENT_TEAM = Y2ZHLKNKYK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GreenMatesColab/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -438,6 +466,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				NSAllowsArbitraryLoads = YES;
+				"OTHER_LDFLAGS[arch=*]" = "";
 				PRODUCT_BUNDLE_IDENTIFIER = mx.tec.a07133177.GreenMatesColab;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -558,6 +588,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4B5B2C5B2CEA5ED70003D6DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.5.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4B5B2C5C2CEA5ED70003D6DD /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B5B2C5B2CEA5ED70003D6DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		4B5B2C5E2CEA5ED70003D6DD /* FirebaseAuthCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B5B2C5B2CEA5ED70003D6DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseAuthCombine-Community";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4B5B2C182CEA53EE0003D6DD /* Project object */;
 }

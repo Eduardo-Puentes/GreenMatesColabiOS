@@ -1,12 +1,20 @@
+//
+//  CreateRecolectaScreen.swift
+//  GreenMatesColab
+//
+//  Created by base on 17/11/24.
+//
+
+
 import SwiftUI
 import MapKit
 
 struct CreateRecolectaScreen: View {
     @Environment(\.presentationMode) var presentationMode
+    @State private var selectedDate: Date = Date()
+    @State private var selectedStartTime: Date = Date()
+    @State private var selectedEndTime: Date = Date()
     @State private var selectedLocation: CLLocationCoordinate2D? = nil
-    @State private var date: String = ""
-    @State private var startTime: String = ""
-    @State private var endTime: String = ""
     @State private var limit: String = ""
     @State private var errorMessage: String? = nil
     @State private var isLoading: Bool = false
@@ -24,24 +32,17 @@ struct CreateRecolectaScreen: View {
                 
                 Form {
                     Section(header: Text("Detalles")) {
-                        TextField("Límite de participantes", text: $limit)
+                        TextField("Límite de Participantes", text: $limit)
                             .keyboardType(.numberPad)
                         
-                        TextField("Fecha (yyyy-MM-dd)", text: $date)
-                            .keyboardType(.default)
+                        DatePicker("Fecha", selection: $selectedDate, displayedComponents: .date)
+                            .datePickerStyle(GraphicalDatePickerStyle())
                         
-                        HStack {
-                            VStack {
-                                Text("Hora de inicio")
-                                TextField("HH:mm", text: $startTime)
-                                    .keyboardType(.numberPad)
-                            }
-                            VStack {
-                                Text("Hora de fin")
-                                TextField("HH:mm", text: $endTime)
-                                    .keyboardType(.numberPad)
-                            }
-                        }
+                        DatePicker("Hora de Inicio", selection: $selectedStartTime, displayedComponents: .hourAndMinute)
+                            .datePickerStyle(WheelDatePickerStyle())
+                        
+                        DatePicker("Hora de Fin", selection: $selectedEndTime, displayedComponents: .hourAndMinute)
+                            .datePickerStyle(WheelDatePickerStyle())
                     }
                     
                     Section(header: Text("Ubicación")) {
@@ -60,6 +61,7 @@ struct CreateRecolectaScreen: View {
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
+                        .padding()
                 }
                 
                 HStack {
@@ -73,7 +75,7 @@ struct CreateRecolectaScreen: View {
                     }
                     .disabled(isLoading || !isFormValid())
                     
-                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                    Button(action: { onClose() }) {
                         Text("Cancelar")
                             .frame(maxWidth: .infinity)
                             .padding()
@@ -89,7 +91,7 @@ struct CreateRecolectaScreen: View {
     }
     
     private func isFormValid() -> Bool {
-        !limit.isEmpty && !date.isEmpty && !startTime.isEmpty && !endTime.isEmpty && selectedLocation != nil
+        !limit.isEmpty && selectedLocation != nil
     }
     
     private func handleCreateRecolecta() {
@@ -100,25 +102,27 @@ struct CreateRecolectaScreen: View {
             return
         }
         
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let calendar = Calendar.current
+        let startDateTime = calendar.date(bySettingHour: calendar.component(.hour, from: selectedStartTime),
+                                          minute: calendar.component(.minute, from: selectedStartTime),
+                                          second: 0, of: selectedDate)!
         
-        let startDateTimeString = "\(date)T\(startTime):00Z"
-        let endDateTimeString = "\(date)T\(endTime):00Z"
+        let endDateTime = calendar.date(bySettingHour: calendar.component(.hour, from: selectedEndTime),
+                                        minute: calendar.component(.minute, from: selectedEndTime),
+                                        second: 0, of: selectedDate)!
         
-        guard let startDateTime = dateFormatter.date(from: startDateTimeString),
-              let endDateTime = dateFormatter.date(from: endDateTimeString) else {
-            errorMessage = "Error al formatear fecha u hora."
+        if endDateTime <= startDateTime {
+            errorMessage = "La hora de fin debe ser después de la hora de inicio."
             return
         }
         
         let recolecta = Recolecta(
-            collaboratorFBID: userInfo.FBID,
-            startTime: startDateTime,
-            endTime: endDateTime,
-            longitude: longitude,
-            latitude: latitude,
-            limit: limitInt
+            CollaboratorFBID: userInfo.FBID,
+            StartTime: startDateTime,
+            EndTime: endDateTime,
+            Longitude: longitude,
+            Latitude: latitude,
+            Limit: limitInt
         )
         
         isLoading = true
