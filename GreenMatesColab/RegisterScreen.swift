@@ -1,10 +1,3 @@
-//
-//  RegisterScreen.swift
-//  GreenMatesColab
-//
-//  Created by base on 17/11/24.
-//
-
 import SwiftUI
 import FirebaseAuth
 
@@ -84,35 +77,59 @@ func registerUser(username: String, email: String, password: String) {
         guard let user = result?.user else { return }
         let newUser = User(CollaboratorID: "", FBID: user.uid, Username: username, Email: email)
         
-        // Register user in the database (replace with actual API call)
         registerUserInDatabase(user: newUser)
     }
 }
 
 func registerUserInDatabase(user: User) {
-    guard let url = URL(string: "http://10.50.90.159:3000/register") else { return }
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    guard let url = URL(string: "https://7cae-189-156-240-57.ngrok-free.app/api/collaborator") else { return }
     
-    do {
-        let jsonData = try JSONEncoder().encode(user)
-        request.httpBody = jsonData
-    } catch {
-        print("Failed to encode user data: \(error.localizedDescription)")
-        return
-    }
-    
-    URLSession.shared.dataTask(with: request) { data, response, error in
+    Auth.auth().currentUser?.getIDToken { token, error in
         if let error = error {
-            print("Network error: \(error.localizedDescription)")
+            print("Failed to get Firebase token: \(error.localizedDescription)")
             return
         }
         
-        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-            print("User successfully registered")
-        } else {
-            print("Failed to register user in database")
+        guard let token = token else {
+            print("Firebase token is nil")
+            return
         }
-    }.resume()
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        do {
+            let jsonData = try JSONEncoder().encode(user)
+            request.httpBody = jsonData
+        } catch {
+            print("Failed to encode user data: \(error.localizedDescription)")
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Network error: \(error.localizedDescription)")
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("Response status code: \(httpResponse.statusCode)")
+                if let data = data,
+                   let responseString = String(data: data, encoding: .utf8) {
+                    print("Response body: \(responseString)")
+                }
+                
+                if httpResponse.statusCode == 200 || httpResponse.statusCode == 201 {
+                    print("User successfully registered in the database")
+                } else {
+                    print("Failed to register user in database")
+                }
+            } else {
+                print("Failed to get HTTP response")
+            }
+        }.resume()
+
+    }
 }

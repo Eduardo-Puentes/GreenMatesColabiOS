@@ -1,11 +1,3 @@
-//
-//  CreateRecolectaScreen.swift
-//  GreenMatesColab
-//
-//  Created by base on 17/11/24.
-//
-
-
 import SwiftUI
 import MapKit
 
@@ -32,7 +24,7 @@ struct CreateRecolectaScreen: View {
                 
                 Form {
                     Section(header: Text("Detalles")) {
-                        TextField("Límite de Participantes", text: $limit)
+                        TextField("Límite de Kg", text: $limit)
                             .keyboardType(.numberPad)
                         
                         DatePicker("Fecha", selection: $selectedDate, displayedComponents: .date)

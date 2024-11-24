@@ -1,11 +1,3 @@
-//
-//  RContributionsScreen.swift
-//  GreenMatesColab
-//
-//  Created by base on 17/11/24.
-//
-
-
 import SwiftUI
 
 struct RContributionsScreen: View {
@@ -17,7 +9,7 @@ struct RContributionsScreen: View {
         VStack {
             if showScanCodeRScreen {
                 ScanCodeRScreen(
-                    onClose: { showScanCodeRScreen = false },
+                    onClose: { showScanCodeRScreen = false; onClose()},
                     recolectaId: recolecta.recollectID
                 )
             } else {
@@ -35,7 +27,7 @@ struct RContributionsScreen: View {
                         .padding(.top)
                     
                     ScrollView {
-                        ForEach(recolecta.donationArray, id: \.userFBID) { donation in
+                        ForEach(Array(recolecta.donationArray.enumerated()), id: \.0) { index, donation in
                             let items = [
                                 donation.cardboard > 0 ? "Cartón: \(donation.cardboard) kg" : nil,
                                 donation.glass > 0 ? "Vidrio: \(donation.glass) kg" : nil,
@@ -44,7 +36,9 @@ struct RContributionsScreen: View {
                                 donation.plastic > 0 ? "Plástico: \(donation.plastic) kg" : nil,
                                 donation.tetrapack > 0 ? "Tetrapack: \(donation.tetrapack) kg" : nil
                             ].compactMap { $0 }
+
                             let total = donation.cardboard + donation.glass + donation.metal + donation.paper + donation.plastic + donation.tetrapack
+
                             ContributionEntry(name: donation.username, items: items, total: Int(total))
                         }
                     }
@@ -86,7 +80,7 @@ struct RecolectaDetailsBox: View {
                     Text("Ubicación: \(recolecta.latitude), \(recolecta.longitude)")
                 }
                 Spacer()
-                CircularProgress(progress: 80) // Replace with dynamic progress if needed
+                CircularProgress(progress: recolecta.donationArray.count * 100 / max(recolecta.limit, 1))
             }
         }
         .padding()
@@ -129,11 +123,11 @@ struct ScanCodeRScreen: View {
     let recolectaId: String
     
     @State private var showAddRecolectaScreen = false
-    @State private var userFBID: String = "j2SLLR35SvakRrnbo5ZM9LGhURA2" // Default UserFBID
+    @State private var userFBID: String = "j2SLLR35SvakRrnbo5ZM9LGhURA2"
     
     var body: some View {
         if showAddRecolectaScreen {
-            AddRecolectaScreen(onClose: { showAddRecolectaScreen = false }, recolectaId: recolectaId, userFBID: userFBID)
+            AddRecolectaScreen(onClose: { showAddRecolectaScreen = false; onClose()}, recolectaId: recolectaId, userFBID: userFBID)
         } else {
             VStack(spacing: 24) {
                 Text("Ecoespacio")
@@ -148,7 +142,6 @@ struct ScanCodeRScreen: View {
                 Text("Escanea código de usuario")
                     .font(.headline)
                 
-                // Simulate QR Code Scanner Box
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 200, height: 200)
@@ -161,7 +154,6 @@ struct ScanCodeRScreen: View {
                     .font(.subheadline)
                     .foregroundColor(.gray)
                 
-                // Input Field for Simulating User FBID
                 VStack(alignment: .leading, spacing: 8) {
                     Text("User FBID")
                         .font(.headline)
@@ -172,7 +164,6 @@ struct ScanCodeRScreen: View {
                 
                 Spacer()
                 
-                // Buttons
                 HStack {
                     Button(action: onClose) {
                         Text("Regresar")

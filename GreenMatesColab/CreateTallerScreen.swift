@@ -113,7 +113,6 @@ struct CreateTallerScreen: View {
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
-        // Combina la fecha y la hora seleccionadas
         let calendar = Calendar.current
         let startDateTime = calendar.date(bySettingHour: calendar.component(.hour, from: selectedStartTime),
                                           minute: calendar.component(.minute, from: selectedStartTime),
@@ -154,22 +153,18 @@ struct PillarCheckbox: View {
     let label: String
     @Binding var selectedPillar: String
     let value: String
-    
+
     var body: some View {
-        HStack {
-            Button(action: {
-                selectedPillar = value
-            }) {
-                HStack {
-                    Circle()
-                        .strokeBorder(selectedPillar == value ? Color.green : Color.gray, lineWidth: 2)
-                        .background(selectedPillar == value ? Color.green : Color.clear)
-                        .frame(width: 24, height: 24)
-                    
-                    Text(label)
-                }
+        Button(action: {
+            selectedPillar = value
+        }) {
+            HStack {
+                Image(systemName: selectedPillar == value ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(selectedPillar == value ? .green : .gray)
+                Text(label)
             }
         }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

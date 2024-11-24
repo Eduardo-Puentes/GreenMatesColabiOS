@@ -1,10 +1,3 @@
-//
-//  GreenMatesColabApp.swift
-//  GreenMatesColab
-//
-//  Created by base on 17/11/24.
-//
-
 import SwiftUI
 import FirebaseAuth
 
@@ -24,12 +17,19 @@ struct ContentView: View {
     @State private var isLoggedIn = false
     @State private var userInfo: User? = nil
     @State private var showLogin = true
-    
+
     var body: some View {
         NavigationView {
             VStack {
                 if isLoggedIn, let user = userInfo {
-                    HomeScreen(userInfo: user)
+                    HomeScreen(
+                        userInfo: user,
+                        onLogout: {
+                            isLoggedIn = false
+                            userInfo = nil
+                            showLogin = true
+                        }
+                    )
                 } else {
                     if showLogin {
                         LoginScreen(
@@ -39,7 +39,7 @@ struct ContentView: View {
                                         isLoggedIn = true
                                         userInfo = fetchedUserInfo
                                     } else {
-                                        // Handle login failure
+                                        // Error Login
                                     }
                                 }
                             },
@@ -55,6 +55,7 @@ struct ContentView: View {
         }
     }
 }
+
 
 func signInWithFirebase(email: String, password: String, completion: @escaping (Bool, User?) -> Void) {
     Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
@@ -75,7 +76,7 @@ func signInWithFirebase(email: String, password: String, completion: @escaping (
 }
 
 func fetchUserData(uid: String, completion: @escaping (User?) -> Void) {
-    let url = URL(string: "http://10.50.90.159:3000/api/collaborator/\(uid)")! // Update endpoint if necessary
+    let url = URL(string: "https://7cae-189-156-240-57.ngrok-free.app/api/collaborator/\(uid)")!
 
     let task = URLSession.shared.dataTask(with: url) { data, response, error in
         guard let data = data, error == nil else {
@@ -86,7 +87,6 @@ func fetchUserData(uid: String, completion: @escaping (User?) -> Void) {
         
         do {
             let userResponse = try JSONDecoder().decode(UserResponse.self, from: data)
-            // Pass the collaborator (User) to the completion handler
             completion(userResponse.collaborator)
         } catch {
             print("Failed to decode user data: \(error.localizedDescription)")

@@ -1,11 +1,3 @@
-//
-//  GreenMatesApi.swift
-//  GreenMatesColab
-//
-//  Created by base on 17/11/24.
-//
-
-
 import Foundation
 
 struct EmptyResponse: Codable {}
@@ -13,7 +5,7 @@ struct EmptyResponse: Codable {}
 
 class GreenMatesApi {
     static let shared = GreenMatesApi()
-    private let baseURL = "http://10.50.90.159:3000"
+    private let baseURL = "https://7cae-189-156-240-57.ngrok-free.app"
     
     private var jsonDecoder: JSONDecoder {
         let decoder = JSONDecoder()
@@ -76,10 +68,8 @@ class GreenMatesApi {
         task.resume()
     }
 
+
     
-    // MARK: - API Calls
-    
-    // Get User
     func getUser(uid: String, completion: @escaping (Result<User, Error>) -> Void) {
         makeRequest(
             endpoint: "/api/collaborator/\(uid)",
@@ -94,13 +84,12 @@ class GreenMatesApi {
         }
     }
     
-    // Create User
     func createUser(user: User, completion: @escaping (Result<Void, Error>) -> Void) {
         makeRequest(
             endpoint: "/api/collaborator",
             method: "POST",
             body: user,
-            responseType: EmptyResponse.self // A helper type for empty responses
+            responseType: EmptyResponse.self
         ) { result in
             switch result {
             case .success:
@@ -150,7 +139,7 @@ class GreenMatesApi {
         ) { result in
             switch result {
             case .success(let courses):
-                print("Fetched Courses: \(courses)") // Debugging line
+                print("Fetched Courses: \(courses)")
                 completion(.success(courses))
             case .failure(let error):
                 print("Error fetching courses: \(error.localizedDescription)")
@@ -161,7 +150,6 @@ class GreenMatesApi {
 
 
     
-    // Get Recolectas
     func getRecolectas(uid: String, completion: @escaping (Result<[getRecolecta], Error>) -> Void) {
         makeRequest(
             endpoint: "/api/recollect/collaborator_recollects/\(uid)",

@@ -1,11 +1,3 @@
-//
-//  AddRecolectaScreen.swift
-//  GreenMatesColab
-//
-//  Created by base on 17/11/24.
-//
-
-
 import SwiftUI
 
 struct AddRecolectaScreen: View {

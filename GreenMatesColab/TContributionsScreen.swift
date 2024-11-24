@@ -1,11 +1,3 @@
-//
-//  TContributionsScreen.swift
-//  GreenMatesColab
-//
-//  Created by base on 17/11/24.
-//
-
-
 import SwiftUI
 
 struct TContributionsScreen: View {
@@ -17,7 +9,7 @@ struct TContributionsScreen: View {
         VStack {
             if showScanCodeTScreen {
                 ScanCodeTScreen(
-                    onClose: { showScanCodeTScreen = false },
+                    onClose: { showScanCodeTScreen = false; onClose()},
                     courseId: taller.courseID
                 )
             } else {
@@ -35,7 +27,7 @@ struct TContributionsScreen: View {
                         .padding(.top)
                     
                     ScrollView {
-                        ForEach(taller.assistantArray, id: \.userFBID) { assistant in
+                        ForEach(Array(taller.assistantArray.enumerated()), id: \.0) { index, assistant in
                             ContributionEntryT(name: assistant.username)
                                 .padding(.bottom, 8)
                         }
@@ -68,6 +60,9 @@ struct TContributionsScreen: View {
 
 struct TallerDetailsBox: View {
     let taller: getTaller
+    var porcentaje: Int {
+        taller.limit > 0 ? taller.assistantArray.count * 100 / taller.limit : 100
+    }
 
     var body: some View {
         VStack {
@@ -78,7 +73,7 @@ struct TallerDetailsBox: View {
                     Text("Ubicación: \(taller.latitude), \(taller.longitude)")
                 }
                 Spacer()
-                CircularProgress(progress: 80) // Replace with dynamic progress if needed
+                CircularProgress(progress: porcentaje)
             }
         }
         .padding()
@@ -155,7 +150,6 @@ struct ScanCodeTScreen: View {
                 .font(.headline)
                 .padding()
 
-            // Placeholder for QR Code Scanner
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.gray.opacity(0.3))
                 .frame(width: 200, height: 200)
@@ -163,7 +157,6 @@ struct ScanCodeTScreen: View {
 
             Spacer()
 
-            // User FBID Input
             TextField("User FBID", text: $userFBID)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()

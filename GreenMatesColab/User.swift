@@ -1,11 +1,3 @@
-//
-//  User.swift
-//  GreenMatesColab
-//
-//  Created by base on 17/11/24.
-//
-
-
 import Foundation
 
 struct UserResponse: Codable {
